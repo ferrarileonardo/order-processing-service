@@ -18,7 +18,7 @@ public class SmsActor extends AbstractBehavior<SmsActor.Command> {
             ActorRef<? super SmsSentResponse> replyTo
     ) implements Command {}
 
-    // ⭐ Nuevo mensaje interno para reintentos
+    //  Nuevo mensaje interno para reintentos
     public record RetrySmsCommand(
             String phoneNumber,
             String message,
@@ -50,13 +50,13 @@ public class SmsActor extends AbstractBehavior<SmsActor.Command> {
     // ======== LÓGICA PRINCIPAL ========
     private Behavior<Command> onSendSms(SendSmsCommand cmd) {
 
-        log.info("📨 Sending SMS to {}: {}", cmd.phoneNumber(), cmd.message());
+        log.info("Sending SMS to {}: {}", cmd.phoneNumber(), cmd.message());
 
-        // ⭐ 1. Simular fallo aleatorio
+        //  1. Simular fallo aleatorio
         if (Math.random() < 0.3) {
-            log.error("❌ SMS failed (first attempt) to {}", cmd.phoneNumber());
+            log.error("SMS failed (first attempt) to {}", cmd.phoneNumber());
 
-            // ⭐ Enviar mensaje de reintento
+            //  Enviar mensaje de reintento
             getContext().getSelf().tell(
                     new RetrySmsCommand(
                             cmd.phoneNumber(),
@@ -70,10 +70,10 @@ public class SmsActor extends AbstractBehavior<SmsActor.Command> {
             return this;
         }
 
-        // ⭐ 2. Simular latencia
+        //  2. Simular latencia
         try { Thread.sleep(500); } catch (InterruptedException ignored) {}
 
-        // ⭐ 3. Respuesta exitosa
+        //  3. Respuesta exitosa
         cmd.replyTo().tell(new SmsSentResponse(true));
         return this;
     }
@@ -81,19 +81,19 @@ public class SmsActor extends AbstractBehavior<SmsActor.Command> {
     // ======== LÓGICA DE REINTENTOS ========
     private Behavior<Command> onRetrySms(RetrySmsCommand cmd) {
 
-        log.warn("🔁 Retry attempt {} of {} for {}",
+        log.warn(" Retry attempt {} of {} for {}",
                 cmd.attempt(), cmd.maxAttempts(), cmd.phoneNumber());
 
-        // ⭐ Simular fallo nuevamente
+        //  Simular fallo nuevamente
         if (Math.random() < 0.3) {
 
             if (cmd.attempt() >= cmd.maxAttempts()) {
-                log.error("❌ SMS permanently failed after {} attempts", cmd.maxAttempts());
+                log.error(" SMS permanently failed after {} attempts", cmd.maxAttempts());
                 cmd.replyTo().tell(new SmsSentResponse(false));
                 return this;
             }
 
-            // ⭐ Enviar siguiente reintento
+            //  Enviar siguiente reintento
             getContext().getSelf().tell(
                     new RetrySmsCommand(
                             cmd.phoneNumber(),
@@ -107,7 +107,7 @@ public class SmsActor extends AbstractBehavior<SmsActor.Command> {
             return this;
         }
 
-        // ⭐ Si el reintento funciona
+        //  Si el reintento funciona
         log.info("📨 SMS sent successfully on retry {}", cmd.attempt());
         cmd.replyTo().tell(new SmsSentResponse(true));
         return this;

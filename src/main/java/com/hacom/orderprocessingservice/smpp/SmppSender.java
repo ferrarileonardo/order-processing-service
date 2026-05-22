@@ -19,7 +19,7 @@ public class SmppSender {
 
     public void sendTestMessage() {
         if (session == null) {
-            log.error("❌ No SMPP session available. Cannot send message.");
+            log.error(" No SMPP session available. Cannot send message.");
             return;
         }
 

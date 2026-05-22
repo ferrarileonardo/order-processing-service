@@ -20,7 +20,7 @@ public class SmppConfig {
         config.setName("hacom-smpp-client");
         config.setType(SmppBindType.TRANSCEIVER);
 
-        // ⭐ Credenciales correctas para Diafaan/Ozeki
+        //  Credenciales correctas para Diafaan/Ozeki
         config.setHost("127.0.0.1");
         config.setPort(2775);
         config.setSystemId("admin");
@@ -33,7 +33,7 @@ public class SmppConfig {
         try {
             return client.bind(config, new DefaultSmppSessionHandler());
         } catch (Exception e) {
-            log.error("❌ SMPP bind failed, continuing without SMPP", e);
+            log.error(" SMPP bind failed, continuing without SMPP", e);
             return null; // No tumbar la app
         }
     }
