@@ -1,0 +1,42 @@
+Configuration:
+  status: warn
+  monitorInterval: 30
+
+  Appenders:
+    Console:
+      name: ConsoleAppender
+      target: SYSTEM_OUT
+      JsonLayout:
+        complete: false
+        compact: true
+        eventEol: true
+        properties: true
+
+    RollingFile:
+      name: FileAppender
+      fileName: logs/app.log
+      filePattern: "logs/app-%d{yyyy-MM-dd}.log.gz"
+      JsonLayout:
+        complete: false
+        compact: true
+        eventEol: true
+        properties: true
+      Policies:
+        TimeBasedTriggeringPolicy:
+          interval: 1
+          modulate: true
+
+  Loggers:
+    Logger:
+      - name: com.hacom.orderprocessingservice
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: ConsoleAppender
+          - ref: FileAppender
+
+    Root:
+      level: info
+      AppenderRef:
+        - ref: ConsoleAppender
+        - ref: FileAppender

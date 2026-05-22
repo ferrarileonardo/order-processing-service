@@ -1,0 +1,24 @@
+mongodbDatabase: exampleDb
+mongodbUri: "mongodb://127.0.0.1:27017"
+apiPort: 9898
+
+grpc:
+  server:
+    port: 9090
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+  metrics:
+    tags:
+      application: order-processing-service
+    export:
+      prometheus:
+        enabled: true

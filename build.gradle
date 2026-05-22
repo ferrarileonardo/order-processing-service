@@ -1,0 +1,105 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.google.protobuf' version '0.9.4'
+}
+
+group = 'com.hacom'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    all {
+        exclude group: 'ch.qos.logback'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'org.slf4j', module: 'slf4j-simple'  // ← conflicto con log4j2
+    }
+}
+
+dependencies {
+
+    // ===== gRPC =====
+    implementation 'net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE'
+    implementation 'io.grpc:grpc-protobuf:1.62.2'
+    implementation 'io.grpc:grpc-stub:1.62.2'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+
+    // ===== SPRING BOOT =====
+    implementation('org.springframework.boot:spring-boot-starter-actuator') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    implementation('org.springframework.boot:spring-boot-starter-webflux') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    implementation('org.springframework.boot:spring-boot-starter-reactor-netty') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+
+    // ===== LOG4J2 =====
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
+    // ===== AKKA =====
+    implementation 'com.typesafe.akka:akka-actor-typed_2.13:2.8.5'
+    implementation 'com.typesafe.akka:akka-stream_2.13:2.8.5'
+
+    // ===== SMPP =====
+    implementation 'com.cloudhopper:ch-smpp:5.0.6'   // cliente (tu SmppClient)
+    implementation 'org.jsmpp:jsmpp:2.3.11'           // servidor (SmppServerMain)
+
+    // ===== PROMETHEUS =====
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // ===== LOMBOK =====
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // ===== TEST =====
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.3"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.62.2"
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                grpc {}
+            }
+            task.builtins {
+                java {}
+            }
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'build/generated/source/proto/main/java'
+            srcDir 'build/generated/source/proto/main/grpc'
+        }
+    }
+}
+task runSmppServer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.hacom.orderprocessingservice.smpp.SmppServerMain'
+}
